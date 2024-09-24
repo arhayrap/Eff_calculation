@@ -1,0 +1,1 @@
+executable       = run_2_PL.csharguments        = $(ProcId)# log              = log/log_$(ClusterId).$(ProcId).log# output           = output/output_$(ClusterId).$(ProcId).out# error            = error/error_$(ClusterId).$(ProcId).erruniverse         = vanillashould_transfer_files   = Yes+JobFlavour      = "longlunch"queue 968

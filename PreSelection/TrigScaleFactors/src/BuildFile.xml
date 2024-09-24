@@ -1,0 +1,52 @@
+<use   name="boost"/>
+<use   name="root"/>
+<use   name="heppdt"/>
+<use   name="GeneratorInterface/HydjetInterface"/>
+<use   name="FWCore/Framework"/>
+<use   name="SimDataFormats/Vertex"/>
+<use   name="SimDataFormats/GeneratorProducts"/>
+<use   name="SimDataFormats/HiGenData"/>
+<use   name="SimGeneral/HepPDTRecord"/>
+<use   name="CommonTools/UtilAlgos"/>
+<use   name="FWCore/ServiceRegistry"/>
+<use   name="DataFormats/Common"/>
+<use   name="clhep"/> 
+<use   name="FWCore/PluginManager"/>
+<use   name="FWCore/ParameterSet"/>
+<use   name="DataFormats/JetReco"/>
+<use   name="DataFormats/TrackingRecHit"/>
+<use   name="DataFormats/TrackReco"/>
+<use   name="DataFormats/GeometryVector"/>
+<use   name="TrackingTools/TransientTrack"/>
+<use   name="TrackingTools/TrackAssociator"/>
+<use   name="TrackingTools/Records"/>
+<use   name="TrackingTools/TrajectoryState"/>
+<use   name="CondFormats/JetMETObjects"/>
+<use   name="JetMETCorrections/Algorithms"/>
+<use   name="JetMETCorrections/Objects"/>
+<use   name="JetMETCorrections/Modules"/>
+<use   name="DataFormats/PatCandidates"/>
+<use   name="DataFormats/Candidate"/>
+
+<use   name="FWCore/Utilities"/>
+<use   name="CondFormats/BTauObjects"/>
+<use   name="CondFormats/Common"/>
+<use   name="CondFormats/Serialization"/>
+<use   name="FWCore/MessageLogger"/>
+<use   name="FWCore/Utilities"/>
+<use   name="boost"/>
+<use   name="CondFormats/PhysicsToolsObjects"/>
+<use   name="CondTools/BTau"/>
+
+<use   name="DataFormats/L1Trigger"/>
+<use   name="CondTools/L1Trigger"/>
+<use   name="xerces-c"/>
+<use   name="utm"/>
+<use   name="L1TriggerConfig/L1GtConfigProducers"/>
+<use   name="L1Trigger/L1TGlobal"/>
+<use   name="L1Trigger/L1TCommon"/>
+<use   name="L1Trigger/GlobalTrigger"/>
+
+<flags   EDM_PLUGIN="1"/>
+
+
