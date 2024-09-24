@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="PL"
+version="UL"
 current_dir=${PWD}
 
 certificate="x509up_u123840"
@@ -31,8 +31,8 @@ printf "cp -r -f ${current_dir}/Samples_A_${i}_${version} ./sample_names \n" >> 
 printf "cp       ${current_dir}/../../Trig_ScaleFactors_OnBParking.py . \n" >> $executable
 printf "scram b \n" >> $executable
 printf "set filelist=( ./sample_names/* ) \n" >> $executable
-printf "echo ${filelist[$newid]} \n" >> $executable
-printf "mv ${filelist[$newid]} BToKPhi.txt \n" >> $executable
+printf "echo \${filelist[\$newid]} \n" >> $executable
+printf "mv \${filelist[\$newid]} BToKPhi.txt \n" >> $executable
 printf "set filenames = \"\" \n" >> $executable
 printf "foreach line ( \"\`cat ./BToKPhi.txt\`\" ) \n" >> $executable
 printf "    set filenames = \"\$filenames \$line\" \n" >> $executable
@@ -42,16 +42,17 @@ printf "cp Trigger_ScaleFactors_OnBParking.root ${output_folder}/output_file_\$1
 printf "rm -r -f * \n" >> $executable
 
 n_jobs=`ls ${current_dir}/Samples_A_${i}_${version} | wc -l`
+echo $n_jobs
 
-printf "executable       = $executable" >> $submitfile
-printf "arguments        = \$(ProcId)" >> $submitfile
-printf "# log              = log/log_\$(ClusterId).\$(ProcId).log" >> $submitfile
-printf "# output           = output/output_\$(ClusterId).\$(ProcId).out" >> $submitfile
-printf "# error            = error/error_\$(ClusterId).\$(ProcId).err" >> $submitfile
-printf "universe         = vanilla" >> $submitfile
-printf "should_transfer_files   = Yes" >> $submitfile
-printf "+JobFlavour      = \"longlunch\"" >> $submitfile
-printf "queue $n_jobs" >> $submitfile
+printf "executable       = $executable \n" >> $submitfile
+printf "arguments        = \$(ProcId) \n" >> $submitfile
+printf "# log              = log/log_\$(ClusterId).\$(ProcId).log \n" >> $submitfile
+printf "# output           = output/output_\$(ClusterId).\$(ProcId).out \n" >> $submitfile
+printf "# error            = error/error_\$(ClusterId).\$(ProcId).err \n" >> $submitfile
+printf "universe         = vanilla \n" >> $submitfile
+printf "should_transfer_files   = Yes \n" >> $submitfile
+printf "+JobFlavour      = \"longlunch\" \n" >> $submitfile
+printf "queue $n_jobs \n" >> $submitfile
 
 chmod 777 $executable
 

@@ -1,0 +1,10 @@
+executable       = run.csh
+arguments        = $(ProcId)
+# log              = log/log_$(ClusterId).$(ProcId).log
+# output           = output/output_$(ClusterId).$(ProcId).out
+# error            = error/error_$(ClusterId).$(ProcId).err
+universe         = vanilla
+should_transfer_files   = Yes
++JobFlavour      = "longlunch"
+queue 802
+# 859

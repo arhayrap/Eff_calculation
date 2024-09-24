@@ -66,69 +66,34 @@
 #include "DataFormats/Candidate/interface/VertexCompositePtrCandidate.h"
 
 double TrigScaleFactors_OnBParking::calculateMuonSVProbability(const pat::Muon& muon, const std::vector<reco::Vertex>& vertices) {
-    // Placeholder for probability calculation (replace with your implementation)
     double probability = 0.0;
-
-    // Get the inner track of the muon
     const reco::TrackRef innerTrack = muon.innerTrack();
 
     if (innerTrack.isNonnull()) {
-        // Check the association of the inner track with the vertices
         size_t numAssociatedVertices = 0;
         int index = 0;
         for (const auto& vertex : vertices) {
-            // cout<<"Track ("<<index<<") "<<vertex.trackWeight(innerTrack)<<endl;
             if (vertex.trackWeight(innerTrack) > 0.5) { // Consider track with weight > 0.5 associated
                 numAssociatedVertices++;
             }
         }
-
-        // Probability calculation: Example only (replace with your implementation)
         probability = static_cast<double>(numAssociatedVertices) / static_cast<double>(vertices.size());
     }
-    // cout<<"probability: "<<probability<<endl;
     return probability;
 }
 
 double TrigScaleFactors_OnBParking::calculateBackpointingAngle(const reco::Vertex& primaryVertex, const reco::VertexCompositePtrCandidate& secondaryVertex, const pat::Muon& muon) {
-    // Vector from primary to secondary vertex
-    // cout<<"1: just entered the function"<<endl;
     math::XYZVector displacement(
         secondaryVertex.vertex().x() - primaryVertex.x(),
         secondaryVertex.vertex().y() - primaryVertex.y(),
         0.0
     );
-    // secondaryVertex.vertex().z() - primaryVertex.z()
-    // cout<<"2: after making the displacement vertex"<<endl;
-
-    // Momentum vector
-    // math::XYZVector momentumVec(muon.px(), muon.py()); //, muon.pz());
     math::XYZVector momentumVec(muon.px(), muon.py(), 0.0); //, muon.pz());
-
-    // cout<<"3: after making the momentum vector"<<endl;
-
-    // Calculate dot product
     double dotProduct = displacement.Dot(momentumVec);
-    // cout<<"4: dotProduct"<<endl;
-
-    // Calculate magnitudes
     double displacementMag = displacement.R(); // sqrt(pow(displacement.X(),2) + pow(displacement.Y(),2) + pow(displacement.Z(),2));
-    
-    cout<<"Magnitude: "<<displacementMag<<endl;
-    cout<<"Magnitude R: "<<displacement.R()<<endl;
-    // cout<<"5: displacementMag"<<endl;
-
     double momentumMag = momentumVec.R();
-    // cout<<"6: momentumMag"<<endl;
-
-    // Calculate cosine of the angle
     double cosTheta = dotProduct / (displacementMag * momentumMag);
-    // cout<<"7: cosTheta"<<endl;
-
-    // Calculate the angle in radians
     double angle = std::acos(cosTheta);
-    // cout<<"8: angle"<<endl;
-
     return angle;
 }
 
@@ -247,7 +212,7 @@ void TrigScaleFactors_OnBParking::analyze(const edm::Event& iEvent, const edm::E
    
    for(int i=0;i<trgSize;i++)
     {
-     cout<<trigNames.triggerName(i)<<endl;
+     // cout<<trigNames.triggerName(i)<<endl;
      if(trigNames.triggerName(i).find(path_Mu9_IP5_part0)  != string::npos)
        path_Mu9_IP5_part0  = trigNames.triggerName(i);
      if(trigNames.triggerName(i).find(path_Mu9_IP5_part1)  != string::npos)
@@ -493,7 +458,7 @@ void TrigScaleFactors_OnBParking::analyze(const edm::Event& iEvent, const edm::E
   double L3_Mu_filters[4][10];
   int N_L3_Muons = 0;
   // cout<<"Before the trigger object collection"<<endl;
-  cout<<endl;
+  // cout<<endl;
   for(int i=0;i<4;i++)
     L3_Mu_pt[i]=L3_Mu_eta[i]=L3_Mu_phi[i]=-100;
 
@@ -511,7 +476,7 @@ void TrigScaleFactors_OnBParking::analyze(const edm::Event& iEvent, const edm::E
             //    std::cout << obj.filterLabels()[h] << '\n';
             // }
             // if (pass_Mu8p5_IP3p5_part0 || pass_Mu8p5_IP3p5_part1 || pass_Mu8p5_IP3p5_part2 || pass_Mu8p5_IP3p5_part3 || pass_Mu8p5_IP3p5_part4) {
-            std::cout << obj.filterLabels()[h] << '\n';
+            // std::cout << obj.filterLabels()[h] << '\n';
             // }
             if(obj.filterLabels()[h]=="hltL3fL1sMu22OrParkL1f0L2f10QL3Filtered12Q"){  // HLT_Mu12_IP6_part*
             L3_Mu_filters[N_L3_Muons][0]=1; condition = true;}
@@ -542,26 +507,26 @@ void TrigScaleFactors_OnBParking::analyze(const edm::Event& iEvent, const edm::E
             }
           // }
         }
-   cout<<"After the trigger object collection"<<endl;
+   // cout<<"After the trigger object collection"<<endl;
 // Primary Vertex *************************************************************
   // bool norm_VTX = false;
   // double PV_x=5000;
   // double PV_y=5000;
   // double PV_z=5000;
-  cout<<1<<endl;
+  // cout<<1<<endl;
 
   const reco::Vertex &PV = vertices->front();
   const reco::VertexCompositePtrCandidate &SV = secondaryVerticesHandle->front();
   double SV_probability = 10;
   // if (SV.isValid()) {
-  cout<<2<<endl;
+  // cout<<2<<endl;
   if (secondaryVerticesHandle.isValid() && !(secondaryVerticesHandle->empty())) {
-     cout<<SV.vertex().x()<<endl;
-     cout<<SV.vertexChi2()<<endl;
+     // cout<<SV.vertex().x()<<endl;
+     // cout<<SV.vertexChi2()<<endl;
      SV_probability = TMath::Prob(SV.vertexChi2(), SV.vertexNdof());
   }
   // }
-  cout<<3<<endl;
+  // cout<<3<<endl;
 
   /*
   for (const reco::Vertex &vtx : *vertices) {
@@ -613,13 +578,13 @@ void TrigScaleFactors_OnBParking::analyze(const edm::Event& iEvent, const edm::E
   Bool_t loose_id = false;
   Bool_t other = false;
   Int_t index = 0;
-  cout<<"before the muon loop"<<endl;
+  // cout<<"before the muon loop"<<endl;
   for (auto mu = recmuons->begin(); mu != recmuons->end(); mu++)
    {
-    cout<<mu->pt()<<"    "<<fabs(mu->eta())<<"     "<<mu->isTightMuon(PV)<<endl;
+    // cout<<mu->pt()<<"    "<<fabs(mu->eta())<<"     "<<mu->isTightMuon(PV)<<endl;
     if(mu->pt() < MinPt || fabs(mu->eta()) > EtaMax) continue;
     if (mu->isTightMuon(PV) && !tight_id) { // The tag muon wasn't selected and is here.
-        cout<<"Tight id"<<endl;
+        // cout<<"Tight id"<<endl;
         tight_id = true;
         tight_index = index;
         N_Off_Mu=0;
@@ -642,7 +607,7 @@ void TrigScaleFactors_OnBParking::analyze(const edm::Event& iEvent, const edm::E
             probSV[N_Off_Mu] = TrigScaleFactors_OnBParking::calculateMuonSVProbability(*mu, *vertices);
             if (secondaryVerticesHandle.isValid() && !(secondaryVerticesHandle->empty())) {
                 mu_PV_theta[N_Off_Mu] = TrigScaleFactors_OnBParking::calculateBackpointingAngle(PV, SV, *mu);
-                cout<<mu_PV_theta[N_Off_Mu]<<endl;
+                // cout<<mu_PV_theta[N_Off_Mu]<<endl;
             } else {
                 mu_PV_theta[N_Off_Mu] = -10.0;
             }
@@ -658,13 +623,13 @@ void TrigScaleFactors_OnBParking::analyze(const edm::Event& iEvent, const edm::E
      }
      index++;
    }
-   cout<<"before the muon loop"<<endl;
+   // cout<<"before the muon loop"<<endl;
    index = 0;
    for (auto mu = recmuons->begin(); mu != recmuons->end(); mu++)
    {
     if(mu->pt() < MinPt || fabs(mu->eta()) > EtaMax) continue;
      if (mu->isLooseMuon() && !loose_id && index != tight_index) { // The tag muon wasn't selected and is here.
-        cout<<"Loose id"<<endl;
+        // cout<<"Loose id"<<endl;
         loose_id = true;
         N_Off_Mu=1;
         mupt[N_Off_Mu]=mu->pt();
@@ -686,7 +651,7 @@ void TrigScaleFactors_OnBParking::analyze(const edm::Event& iEvent, const edm::E
             probSV[N_Off_Mu] = TrigScaleFactors_OnBParking::calculateMuonSVProbability(*mu, *vertices);
             if (secondaryVerticesHandle.isValid() && !(secondaryVerticesHandle->empty())) {
                 mu_PV_theta[N_Off_Mu] = TrigScaleFactors_OnBParking::calculateBackpointingAngle(PV, SV, *mu);
-                cout<<mu_PV_theta[N_Off_Mu]<<endl;
+                // cout<<mu_PV_theta[N_Off_Mu]<<endl;
             } else {
                 mu_PV_theta[N_Off_Mu] = -10.0;
             }
@@ -702,7 +667,7 @@ void TrigScaleFactors_OnBParking::analyze(const edm::Event& iEvent, const edm::E
      }
      index++;
    }
-   cout<<"the muons had been selected"<<endl;
+   // cout<<"the muons had been selected"<<endl;
    
    double dr_tag = 10;
    double dr_probe = 10;

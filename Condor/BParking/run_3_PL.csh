@@ -14,8 +14,8 @@ cp -r -f /afs/cern.ch/user/a/arhayrap/scratch0/CMSSW_14_0_5/src/Eff_calculation/
 cp       /afs/cern.ch/user/a/arhayrap/scratch0/CMSSW_14_0_5/src/Eff_calculation/Condor/BParking/../../Trig_ScaleFactors_OnBParking.py . 
 scram b 
 set filelist=( ./sample_names/* ) 
-echo  
-mv  BToKPhi.txt 
+echo ${filelist[$newid]} 
+mv ${filelist[$newid]} BToKPhi.txt 
 set filenames = "" 
 foreach line ( "`cat ./BToKPhi.txt`" ) 
     set filenames = "$filenames $line" 

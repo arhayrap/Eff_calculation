@@ -24,7 +24,7 @@ process.source = cms.Source("PoolSource",
      # "root://cms-xrd-global.cern.ch//store/data/Run2018D/ParkingBPH1/MINIAOD/PromptReco-v2/000/321/712/00000/02132230-F1A8-E811-8187-FA163E2C7D31.root"
     )
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 
 
 ###########################  Analyser
