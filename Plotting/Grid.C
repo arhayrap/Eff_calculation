@@ -54,9 +54,10 @@ double dr_Func(double eta1, double eta2, double phidist12) {
 using namespace std;
 using namespace std::chrono;
 
-void Make_Histograms() {
-  TString dataset = "MC_PL";
-  TFile * f = new TFile("Histograms_" + dataset + ".root", "RECREATE");
+void Grid() {
+  // TString dataset = "MC_PL";
+  // TFile * f = new TFile("Histograms_grid_" + dataset + ".root", "RECREATE");
+  TFile * f = new TFile("output.root", "RECREATE");
 
   Float_t probe_pt_range[] = {
     6.0,
@@ -71,6 +72,7 @@ void Make_Histograms() {
     20.0,
     100.0
   };
+
   Float_t displacement_significance[] = {
     0.0,
     3.0,
@@ -103,99 +105,31 @@ void Make_Histograms() {
   const int x_bins = sizeof(probe_pt_range) / sizeof(probe_pt_range[0]) - 1;
   const int y_bins = sizeof(displacement_significance) / sizeof(displacement_significance[0]) - 1;
 
-  TH1D * _Mu_Tag_pt = new TH1D("Mu_Tag_pt", "Mu_Tag_pt", 100, 0, 100);
-  TH1D * _Mu_Tag_eta = new TH1D("Mu_Tag_eta", "Mu_Tag_eta", 100, -5, 5);
-  TH1D * _Mu_Probe_pt = new TH1D("Mu_Probe_pt", "Mu_Probe_pt", 200, 0, 100);
-  TH1D * _Mu_Probe_eta = new TH1D("Mu_Probe_eta", "Mu_Probe_eta", 100, -5, 5);
-  TH1D * _Mu_Probe_IP = new TH1D("Mu_Probe_IP", "Mu_Probe_IP", 100, 0, 100);
-  TH1D * _Inv_Mass = new TH1D("Inv_Mass", "Inv_Mass", 100, 2.5, 3.5);
-  TH1D * _DR_Tag_Probe = new TH1D("DR_Tag_Probe", "DR_Tag_Probe", 30, 0, 1);
-  TH1D * _DPHI_Tag_Probe = new TH1D("DPHI_Tag_Probe", "DPHI_Tag_Probe", 30, 0, 4);
-  TH1D * IP = new TH1D("Probe_IP", "Probe_IP", 150, 0, 500);
-
-  TH1D * PROB_SV = new TH1D("PROB_SV", "PROB_SV", 30, 0, 1);
-  TH1D * TAG_DR_SV = new TH1D("TAG_DR_SV", "TAG_DR_SV", 30, -150, 150);
-  TH1D * PROBE_DR_SV = new TH1D("PROBE_DR_SV", "PROBE_DR_SV", 30, -150, 150);
-  TH1D * cutflow_table = new TH1D("cutflow_table", "cutflow_table", 20, 0, 10); // cutflow_bins);
+  TH2D * Numerator = new TH2D("Numerator", "Numerator", 10, 0, 10, 9, 0, 9);
+  TH2D * Denominator = new TH2D("Denominator", "Denominator", 10, 0, 10, 9, 0, 9);
+  TH2D * Failed = new TH2D("Failed", "Failed", 10, 0, 10, 9, 0, 9);
   
-  cutflow_table -> GetXaxis() -> SetNdivisions(10);
+  TH1D * m_inv_matrix_num[x_bins][y_bins] = {};
+  TH1D * m_inv_matrix_denom[x_bins][y_bins] = {};
+  TH1D * m_inv_matrix_failed[x_bins][y_bins] = {};
+  for (int i = 0; i < x_bins; i++) { // PT
+     for (int j = 0; j < y_bins; j++) { // Displacement significance
+        TString name_num = "Minv_" + to_string(i+1) + "_" + to_string(j+1) + "_num";
+        TString name_denom = "Minv_" + to_string(i+1) + "_" + to_string(j+1) + "_denom";
+        TString name_failed = "Minv_" + to_string(i+1) + "_" + to_string(j+1) + "_failed";
+        m_inv_matrix_num[i][j] = new TH1D(name_num, name_num, 100, 2.5, 3.5);
+        m_inv_matrix_denom[i][j] = new TH1D(name_denom, name_denom, 100, 2.5, 3.5);
+        m_inv_matrix_failed[i][j] = new TH1D(name_failed, name_failed, 100, 2.5, 3.5);
+        // if (Probe_pt > probe_pt_range[i] && Probe_pt < probe_pt_range[i + 1] && Probe_IP > displacement_significance[j] && Probe_IP < displacement_significance[j + 1]) {
+        //   Numerator -> SetBinContent(i + 1, j + 1, Numerator -> GetBinContent(i + 1, j + 1) + 1);
+        // }
+     }
+  }
 
-  TH2D * _Mu_Probe_2D_PT_IP = new TH2D("Mu_Probe_2D_PT_IP", "Mu_Probe_2D_PT_IP", 200, 0, 100, 1000, 0, 500);
-  TH2D * _Mu_Probe_2D_PT_IP_GRID = new TH2D("Mu_Probe_2D_PT_IP_GRID", "Mu_Probe_2D_PT_IP_GRID", x_bins, probe_pt_range, y_bins, displacement_significance);
-  TH2D * _Tag_Probe_DR_SV = new TH2D("_Tag_Probe_DR_SV", "_Tag_Probe_DR_SV", 30, 0, 1.5, 30, 0, 1.5);
-  // TH2D * _Tag_Probe_DR_SV = new TH2D("_Tag_Probe_DR_SV", "_Tag_Probe_DR_SV", 30, 0, 1.5, 30, 0, 1.5);
-  TH2D * _Tag_Probe_charge = new TH2D("_Tag_Probe_charge", "_Tag_Probe_charge", 10, -5, 5, 10, -5, 5);
-
-  TH1D * _Mu_Probe_Matched_pt = new TH1D("Mu_Probe_Matched_pt", "Mu_Probe_Matched_pt", 100, 0, 100);
-  TH1D * _Mu_Probe_Matched_IP = new TH1D("Mu_Probe_Matched_IP", "Mu_Probe_Matched_IP", 500, 0, 500);
-  TH2D * _Mu_Probe_Matched_2D_PT_IP = new TH2D("Mu_Probe_Matched_2D_PT_IP", "Mu_Probe_Matched_2D_PT_IP", 200, 0, 100, 1000, 0, 500);
-  TH2D * _Mu_Probe_Matched_2D_MAP_NUM = new TH2D("Mu_Probe_Matched_2D_MAP_NUM", "Mu_Probe_Matched_2D_MAP_NUM", 10, 0, 10, 9, 0, 9);
-  TH2D * _Mu_Probe_Matched_2D_MAP_NOM = new TH2D("Mu_Probe_Matched_2D_MAP_NOM", "Mu_Probe_Matched_2D_MAP_NUM", 10, 0, 10, 9, 0, 9);
-  TH2D * _Mu_Probe_Matched_2D_MAP = new TH2D("Mu_Probe_Matched_2D_MAP_NOM", "Mu_Probe_Matched_2D_MAP_NUM", 10, 0, 10, 9, 0, 9);
-  TH2D * _Mu_Probe_Matched_2D_PT_IP_GRID = new TH2D("Mu_Probe_Matched_2D_PT_IP_GRID", "Mu_Probe_Matched_2D_PT_IP_GRID", x_bins, probe_pt_range, y_bins, displacement_significance);
-  TH2D * _Mu_Probe_Matched_2D_PT_IP_GRID_EFF = new TH2D("Mu_Probe_Matched_2D_PT_IP_GRID_EFF", "Mu_Probe_Matched_2D_PT_IP_GRID_EFF", x_bins, probe_pt_range, y_bins, displacement_significance);
-
-  
-  TH1D * m_inv_matrix[x_bins][y_bins] = {};
-
-  TFile * f0;
-  TChain * ch;
+  TFile * f0 = TFile::Open("input.root");
+  // TChain * ch;
   std::string base_folder = "/eos/user/a/arhayrap/";
   std::string base = "";
-
-  if (dataset == "MC_PL") {
-    f0 = TFile::Open("/eos/user/a/arhayrap/JPsi/JPsi_output_data_PL_Tight_Loose_ID_test_old_version_555/JPsi_output_data_PL_Tight_Loose_ID_test_old_version_555.root");
-  } else if (dataset == "MC_UL") {
-    f0 = TFile::Open("/eos/user/a/arhayrap/JPsi/JPsi_output_data_UL_Tight_Loose_ID_test_old_version_222/JPsi_output_data_UL_Tight_Loose_ID_test_old_version_222.root");
-  } else {
-    f0 = TFile::Open("/eos/user/a/arhayrap/BParking_skimmed_A_1_UL/BParking_skimmed_A_1_UL.root");
-  }
-  
-  /*std::string bases[] = {
-      // "BParking_skimmed_A_1_PL",
-      // "BParking_skimmed_A_2_PL",
-      // "BParking_skimmed_A_3_PL",
-      // "BParking_skimmed_A_4_PL",
-      // "BParking_skimmed_A_5_PL",
-      // "BParking_skimmed_A_6_PL"
-  };
-  
-  std::string bases[] = {
-      "BParking_skimmed_A_1_UL",
-      "BParking_skimmed_A_2_UL",
-      "BParking_skimmed_A_3_UL",
-      "BParking_skimmed_A_4_UL",
-      "BParking_skimmed_A_5_UL",
-      "BParking_skimmed_A_6_UL"
-  };
-  
-  TChain * T_Tag = new TChain("Training/Reco_Jets/Tag_Candidate");
-  TChain * T_Probe = new TChain("Training/Reco_Jets/Probe_Candidate");
-  TChain * T_Tag_tr = new TChain("Training/Reco_Jets/Tag_Candidate_Track");
-  TChain * T_Probe_tr = new TChain("Training/Reco_Jets/Probe_Candidate_Track");
-  TChain * T_L3_0 = new TChain("Training/Reco_Jets/L3_0");
-  TChain * T_L3_1 = new TChain("Training/Reco_Jets/L3_1");
-  TChain * T_L3_2 = new TChain("Training/Reco_Jets/L3_2");
-  TChain * T_L3_3 = new TChain("Training/Reco_Jets/L3_3");
-  TChain * HLT_result = new TChain("Training/Reco_Jets/HLT_result");
-
-  for (int b = 0; b < sizeof(bases) / sizeof(bases[0]); b++) {
-      std::string path = base_folder + "/" + bases[b] + "/";
-      for (const auto & entry : fs::directory_iterator(path)) {
-          cout<<entry.path().string()<<endl;
-          TString entry_path = entry.path().string();
-          T_Tag->AddFile(entry_path);
-          T_Probe->AddFile(entry_path);
-          T_Tag_tr->AddFile(entry_path);
-          T_Probe_tr->AddFile(entry_path);
-          T_L3_0->AddFile(entry_path);
-          T_L3_1->AddFile(entry_path);
-          T_L3_2->AddFile(entry_path);
-          T_L3_3->AddFile(entry_path);
-          HLT_result->AddFile(entry_path);
-      }
-  }
-  */
 
   TTree * T_Tag = (TTree * ) f0 -> Get("Training/Reco_Jets/Tag_Candidate");
   TTree * T_Probe = (TTree * ) f0 -> Get("Training/Reco_Jets/Probe_Candidate");
@@ -347,6 +281,7 @@ void Make_Histograms() {
     
     const int N = sizeof(cuts) / sizeof(cuts[0]);
 
+  /*
   TH2D * cutflow_plots[N];
   TH2D * cutflow_plots_denominator[N];
 
@@ -354,6 +289,7 @@ void Make_Histograms() {
     cutflow_plots[c] = new TH2D(cuts[c], cuts[c], 10, 0, 10, 9, 0, 9);
     cutflow_plots_denominator[c] = new TH2D(cuts[c], cuts[c], 10, 0, 10, 9, 0, 9);
   }
+  */
 
   double n_matched = 0.0;
   double matched_denominator = 0.0;
@@ -386,12 +322,12 @@ void Make_Histograms() {
     // Bool_t L3_0_HLT = (L3_0_HLT_Mu12_IP6 || L3_0_HLT_Mu9_IP6 || L3_0_HLT_Mu9_IP5 || L3_0_HLT_Mu9_IP4 || L3_0_HLT_Mu8_IP5 || L3_0_HLT_Mu8_IP6 || L3_0_HLT_Mu8_IP3 || L3_0_HLT_Mu7_IP4);
     // Bool_t L3_1_HLT = (L3_1_HLT_Mu12_IP6 || L3_1_HLT_Mu9_IP6 || L3_1_HLT_Mu9_IP5 || L3_1_HLT_Mu9_IP4 || L3_1_HLT_Mu8_IP5 || L3_1_HLT_Mu8_IP6 || L3_1_HLT_Mu8_IP3 || L3_1_HLT_Mu7_IP4);
     
-    bool matchet_to_leading = false;
-    bool matchet_to_subleading = false;
+    bool matched_to_leading = false;
+    bool matched_to_subleading = false;
     double Probe_IP = abs(Probe_dxy / Probe_dxyErr);
 
-    if (dr_Func(Tag_eta, L3_0_eta, phi_dist(Tag_phi, L3_0_phi)) < 0.2) matchet_to_leading = true;
-    if (dr_Func(Tag_eta, L3_1_eta, phi_dist(Tag_phi, L3_1_phi)) < 0.2) matchet_to_subleading = true;
+    if (dr_Func(Tag_eta, L3_0_eta, phi_dist(Tag_phi, L3_0_phi)) < 0.2) matched_to_leading = true;
+    if (dr_Func(Tag_eta, L3_1_eta, phi_dist(Tag_phi, L3_1_phi)) < 0.2) matched_to_subleading = true;
 
     Bool_t L3_0_HLT_tag = (L3_0_HLT_Mu12_IP6 || L3_0_HLT_Mu9_IP6);
     Bool_t L3_1_HLT_tag = (L3_1_HLT_Mu12_IP6 || L3_1_HLT_Mu9_IP6);
@@ -411,8 +347,8 @@ void Make_Histograms() {
 
     if (Tag_TightID != 1) continue;
     if (Probe_LooseID != 1) continue;
-    // if (!((matchet_to_leading && L3_0_HLT_tag) || (matchet_to_subleading_1 && L3_1_HLT_tag) || (matchet_to_subleading_2 && L3_2_HLT_tag) || (matchet_to_subleading_3 && L3_3_HLT_tag))) continue; // The TAG muon had matched to a leading or subleading trigger object.
-    if (!((matchet_to_leading && L3_0_HLT_tag) || (matchet_to_subleading && L3_1_HLT_tag))) continue; // The TAG muon had matched to a leading or subleading trigger object.
+    // if (!((matched_to_leading && L3_0_HLT_tag) || (matched_to_subleading_1 && L3_1_HLT_tag) || (matched_to_subleading_2 && L3_2_HLT_tag) || (matched_to_subleading_3 && L3_3_HLT_tag))) continue; // The TAG muon had matched to a leading or subleading trigger object.
+    if (!((matched_to_leading && L3_0_HLT_tag) || (matched_to_subleading && L3_1_HLT_tag))) continue; // The TAG muon had matched to a leading or subleading trigger object.
     // if (!((L3_0_HLT_tag) || (L3_1_HLT_tag))) continue; // The TAG muon had matched to a leading or subleading trigger object.
     // if (!(Tag_dr_SV >= 0 && Probe_dr_SV >= 0)) continue;
     
@@ -421,15 +357,13 @@ void Make_Histograms() {
     double dr_Tag_Probe = dr_Func(Tag_eta, Probe_eta, phi_dist(Tag_phi, Probe_phi));
     double dphi_Tag_Probe = phi_dist(Tag_phi, Probe_phi);
 
-    _Tag_Probe_DR_SV -> Fill(Tag_dr_SV, Probe_dr_SV);
-    _Tag_Probe_charge -> Fill(Tag_charge, Probe_charge);
-    TAG_DR_SV -> Fill(Tag_dr_SV);
-    PROBE_DR_SV -> Fill(Probe_dr_SV);
+    // _Tag_Probe_DR_SV -> Fill(Tag_dr_SV, Probe_dr_SV);
+    // _Tag_Probe_charge -> Fill(Tag_charge, Probe_charge);
+    // TAG_DR_SV -> Fill(Tag_dr_SV);
+    // PROBE_DR_SV -> Fill(Probe_dr_SV);
     
     bool selection[N] = {};
     bool sel = false;
-    
-    // cout<<Probe_dr_SV<<"   "<<Tag_dr_SV<<endl;
     
     selection[0] = true;
     selection[1] = ((Tag_charge + Probe_charge) == 0);
@@ -451,160 +385,65 @@ void Make_Histograms() {
         }
     }
 
-    for (int iter = 0; iter < N; iter++) {
-      // Fill the selection bins that correspond to the iteration number.
-      if (iter == 0) {
-        sel = selection[0];
-      } else {
-        for (int s = 0; s <= iter; s++) {
-          sel = (sel && selection[s]);
-        }
-      }
-      if (sel) {
-        cutflow_table -> Fill(iter);
-        for (int j = 0; j < x_bins; j++) { // PT
-          for (int k = 0; k < y_bins; k++) { // Displacement significance
-            if (Probe_pt >= probe_pt_range[j] && Probe_pt < probe_pt_range[j + 1] && Probe_IP >= displacement_significance[k] && Probe_IP < displacement_significance[k + 1]) {
-              cutflow_plots_denominator[iter] -> SetBinContent(j + 1, k + 1, cutflow_plots_denominator[iter] -> GetBinContent(j + 1, k + 1) + 1.0);
-            }
-          }
-        }
-        if (matchet_to_leading && L3_1_HLT) {
-          if (dr_Func(Probe_eta, L3_1_eta, phi_dist(Probe_phi, L3_1_phi)) < 0.2) {
-            // cout<<"matched to a subleading trigger object"<<endl;
-            for (int j = 0; j < x_bins; j++) { // PT
-              for (int k = 0; k < y_bins; k++) { // Displacement significance
-                if (Probe_pt >= probe_pt_range[j] && Probe_pt < probe_pt_range[j + 1] && Probe_IP >= displacement_significance[k] && Probe_IP < displacement_significance[k + 1]) {
-                  cutflow_plots[iter] -> SetBinContent(j + 1, k + 1, cutflow_plots[iter] -> GetBinContent(j + 1, k + 1) + 1.0);
-                }
-              }
-            }
-          }
-        }
-        else if (matchet_to_subleading && L3_0_HLT) {
-          if (dr_Func(Probe_eta, L3_0_eta, phi_dist(Probe_phi, L3_0_phi)) < 0.2) {
-            // cout<<"matched to a leading trigger object"<<endl;
-            for (int j = 0; j < x_bins; j++) { // PT
-              for (int k = 0; k < y_bins; k++) { // Displacement significance
-                if (Probe_pt >= probe_pt_range[j] && Probe_pt < probe_pt_range[j + 1] && Probe_IP >= displacement_significance[k] && Probe_IP < displacement_significance[k + 1]) {
-                  cutflow_plots[iter] -> SetBinContent(j + 1, k + 1, cutflow_plots[iter] -> GetBinContent(j + 1, k + 1) + 1.0);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    
-    
     if (!all_selections) continue;
 
-    // if (!(Tag_charge + Probe_charge == 0)) continue; // Summary charge of the TAG and PROBE muons is 0.
-    // if (!((L3_0_HLT_tag && matchet_to_leading) || (L3_1_HLT_tag && matchet_to_subleading))) continue; // Matching to one of the leading or subleading HLT trigger objects.
-    // if (!((Tag_Global) && (Tag_ntracks > 5) && (Tag_npixels > 0) && (Tag_dxy < 0.3) && (Tag_dz < 20) && (Tag_track_purity == 1.0))) continue; // Soft muon identification criteria
-    // if (!(Prob_SV > 1e-5)) continue;
-    // if (!(cos(Tag_PV_theta) > 0.9 && cos(Probe_PV_theta) > 0.9)) continue;
-    // if (!(DiMu_System.M() > 2.9 && DiMu_System.M() < 3.3)) continue;
-    // if (!(Tag_track_purity == 1.0 && Probe_track_purity == 1.0)) continue;
-    // if (dr_Func(Tag_eta, Probe_eta, phi_dist(Tag_phi, Probe_phi))>0.6) continue;
-
     test_nom+=1.0;
-    IP -> Fill(Probe_IP);
-    _Inv_Mass -> Fill(DiMu_System.M());
-    _Mu_Tag_pt -> Fill(Tag_pt);
-    _Mu_Tag_eta -> Fill(Tag_eta);
-    _Mu_Probe_pt -> Fill(Probe_pt);
-    _Mu_Probe_eta -> Fill(Probe_eta);
-    _DR_Tag_Probe -> Fill(dr_Tag_Probe);
-    _DPHI_Tag_Probe -> Fill(dphi_Tag_Probe);
-    PROB_SV -> Fill(Prob_SV);
-
-    _Mu_Probe_IP -> Fill(Probe_IP);
-    _Mu_Probe_2D_PT_IP -> Fill(Probe_pt, Probe_IP);
-    _Mu_Probe_2D_PT_IP_GRID -> Fill(Probe_pt, Probe_IP);
-
-    if (L3_1_pt > 0 && matchet_to_leading && L3_1_HLT) {
+    if (L3_1_pt > 0 && matched_to_leading && L3_1_HLT) {
       test_num+=1.0;
-      // cutflow_table->Fill(9);
       if (dr_Func(Probe_eta, L3_1_eta, phi_dist(Probe_phi, L3_1_phi)) < 0.2) {
-        _Mu_Probe_Matched_pt -> Fill(Probe_pt);
-        _Mu_Probe_Matched_IP -> Fill(Probe_IP);
         for (int i = 0; i < x_bins; i++) { // PT
           for (int j = 0; j < y_bins; j++) { // Displacement significance
             if (Probe_pt > probe_pt_range[i] && Probe_pt < probe_pt_range[i + 1] && Probe_IP > displacement_significance[j] && Probe_IP < displacement_significance[j + 1]) {
-              _Mu_Probe_Matched_2D_MAP_NUM -> SetBinContent(i + 1, j + 1, _Mu_Probe_Matched_2D_MAP_NUM -> GetBinContent(i + 1, j + 1) + 1);
+              m_inv_matrix_num[i][j] -> Fill(DiMu_System.M());
+              Numerator -> SetBinContent(i + 1, j + 1, Numerator -> GetBinContent(i + 1, j + 1) + 1);
             }
           }
         }
-        _Mu_Probe_Matched_2D_PT_IP -> Fill(Probe_pt, Probe_IP);
-        _Mu_Probe_Matched_2D_PT_IP_GRID -> Fill(Probe_pt, Probe_IP);
-       } else {
-           cout<<matchet_to_leading<<"       "<<L3_1_HLT<<"       "<<phi_dist(Probe_phi, L3_1_phi)<<endl;
        }
-    } else if (L3_0_pt > 0 && matchet_to_subleading && L3_0_HLT) {
+    } else if (L3_0_pt > 0 && matched_to_subleading && L3_0_HLT) {
       test_num+=1.0;
-      // cutflow_table->Fill(9);
-       if (dr_Func(Probe_eta, L3_0_eta, phi_dist(Probe_phi, L3_0_phi)) < 0.2) {
-        _Mu_Probe_Matched_pt -> Fill(Probe_pt);
-        _Mu_Probe_Matched_IP -> Fill(Probe_IP);
+      if (dr_Func(Probe_eta, L3_0_eta, phi_dist(Probe_phi, L3_0_phi)) < 0.2) {
         for (int i = 0; i < x_bins; i++) { // PT
           for (int j = 0; j < y_bins; j++) { // Displacement significance
             if (Probe_pt > probe_pt_range[i] && Probe_pt < probe_pt_range[i + 1] && Probe_IP > displacement_significance[j] && Probe_IP < displacement_significance[j + 1]) {
-              _Mu_Probe_Matched_2D_MAP_NUM -> SetBinContent(i + 1, j + 1, _Mu_Probe_Matched_2D_MAP_NUM -> GetBinContent(i + 1, j + 1) + 1);
+              m_inv_matrix_num[i][j] -> Fill(DiMu_System.M());
+              Numerator -> SetBinContent(i + 1, j + 1, Numerator -> GetBinContent(i + 1, j + 1) + 1);
             }
           }
         }
-        _Mu_Probe_Matched_2D_PT_IP -> Fill(Probe_pt, Probe_IP);
-        _Mu_Probe_Matched_2D_PT_IP_GRID -> Fill(Probe_pt, Probe_IP);
-      } else {
-        cout<<matchet_to_subleading<<"       "<<L3_0_HLT<<"      "<<phi_dist(Probe_phi, L3_0_phi)<<endl;
-      }
+      } /* else {
+        for (int i = 0; i < x_bins; i++) { // PT
+            for (int j = 0; j < y_bins; j++) { // Displacement significance
+                if (Probe_pt > probe_pt_range[i] && Probe_pt < probe_pt_range[i + 1] && Probe_IP > displacement_significance[j] && Probe_IP < displacement_significance[j + 1]) {
+                    m_inv_matrix_failed[i][j] -> Fill(DiMu_System.M());
+                    Failed -> SetBinContent(i + 1, j + 1, Numerator -> GetBinContent(i + 1, j + 1) + 1);
+                }
+            }
+         }
+      } */
+    } else {
+        for (int i = 0; i < x_bins; i++) { // PT
+            for (int j = 0; j < y_bins; j++) { // Displacement significance
+                if (Probe_pt > probe_pt_range[i] && Probe_pt < probe_pt_range[i + 1] && Probe_IP > displacement_significance[j] && Probe_IP < displacement_significance[j + 1]) {
+                    m_inv_matrix_failed[i][j] -> Fill(DiMu_System.M());
+                    Failed -> SetBinContent(i + 1, j + 1, Failed -> GetBinContent(i + 1, j + 1) + 1);
+                }
+            }
+        }
     }
     for (int i = 0; i < x_bins; i++) { // PT
        for (int j = 0; j < y_bins; j++) { // Displacement significance
-        if (Probe_pt > probe_pt_range[i] && Probe_pt < probe_pt_range[i + 1] && Probe_IP > displacement_significance[j] && Probe_IP < displacement_significance[j + 1]) {
-          _Mu_Probe_Matched_2D_MAP_NOM -> SetBinContent(i + 1, j + 1, _Mu_Probe_Matched_2D_MAP_NOM -> GetBinContent(i + 1, j + 1) + 1);
+           if (Probe_pt > probe_pt_range[i] && Probe_pt < probe_pt_range[i + 1] && Probe_IP > displacement_significance[j] && Probe_IP < displacement_significance[j + 1]) {
+               m_inv_matrix_denom[i][j] -> Fill(DiMu_System.M());
+               Denominator -> SetBinContent(i + 1, j + 1, Denominator -> GetBinContent(i + 1, j + 1) + 1);
+           }
         }
-      }
     }
-
-  }
-
-  for (int j = 0; j < x_bins; j++) {
-    for (int k = 0; k < y_bins; k++) {
-      Float_t Nom = _Mu_Probe_2D_PT_IP_GRID -> GetBinContent(j + 1, k + 1);
-      Float_t Nom_err = _Mu_Probe_2D_PT_IP_GRID -> GetBinError(j + 1, k + 1);
-      for (int l = 0; l < N; l++) {
-        Float_t Num_1 = cutflow_plots[l] -> GetBinContent(j + 1, k + 1);
-        Float_t Num_err_1 = cutflow_plots[l] -> GetBinError(j + 1, k + 1);
-        Float_t Nom_1 = cutflow_plots_denominator[l] -> GetBinContent(j + 1, k + 1);
-        Float_t Nom_err_1 = cutflow_plots_denominator[l] -> GetBinError(j + 1, k + 1);
-        cutflow_plots[l] -> SetBinContent(j + 1, k + 1, Num_1 / Nom_1);
-        cutflow_plots[l] -> SetBinError(j + 1, k + 1, (Num_1 / Nom_1) * sqrt(pow(Num_err_1 / Num_1, 2) + pow(Nom_err_1 / Nom_1, 2)));
-      }
-
-      Float_t Num = _Mu_Probe_Matched_2D_PT_IP_GRID -> GetBinContent(j + 1, k + 1);
-      Float_t Num_err = _Mu_Probe_Matched_2D_PT_IP_GRID -> GetBinError(j + 1, k + 1);
-
-      _Mu_Probe_Matched_2D_PT_IP_GRID_EFF -> SetBinContent(j + 1, k + 1, Num / Nom);
-      _Mu_Probe_Matched_2D_PT_IP_GRID_EFF -> SetBinError(j + 1, k + 1, (Num / Nom) * sqrt(pow(Num_err / Num, 2) + pow(Nom_err / Nom, 2)));
-
-      Num = _Mu_Probe_Matched_2D_MAP_NUM -> GetBinContent(j + 1, k + 1);
-      Nom = _Mu_Probe_Matched_2D_MAP_NOM -> GetBinContent(j + 1, k + 1);
-      Nom_err = _Mu_Probe_Matched_2D_MAP_NOM -> GetBinError(j + 1, k + 1);
-      Num_err = _Mu_Probe_Matched_2D_MAP_NUM -> GetBinError(j + 1, k + 1);
-
-      _Mu_Probe_Matched_2D_MAP -> SetBinContent(j + 1, k + 1, Num / Nom);
-      _Mu_Probe_Matched_2D_MAP -> SetBinError(j + 1, k + 1, (Num / Nom) * sqrt(pow(Num_err / Num, 2) + pow(Nom_err / Nom, 2)));
-    }
-  }
-
-  for (int j = 0; j < N; j++) {
-    cutflow_table -> GetXaxis() -> ChangeLabel(j + 1, 60, 0.025, -1, -1, -1, cuts[j]);
   }
 
   f -> Write();
-
+  
+  /*
   TCanvas * Minv = new TCanvas("Minv", "Minv");
   _Inv_Mass -> Draw();
   Minv -> SaveAs("Minv.png");
@@ -675,6 +514,8 @@ void Make_Histograms() {
     cutflow_plots[p] -> Draw("COLZ TEXT E");
     cutflow_canvas -> SaveAs(cuts[p] + "_2D_HIST.png");
   }
+  */
+  
   auto stop = high_resolution_clock::now();
   auto duration = duration_cast<microseconds>(stop - start);
   cout<<"The duration of the execution of the script: "<<duration.count() * 1000000<<" s."<<endl;

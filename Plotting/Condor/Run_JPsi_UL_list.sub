@@ -1,0 +1,6 @@
+Executable = run_JPsi_UL_list.sh 
+universe = vanilla 
+Should_Transfer_Files = YES 
+arguments = $(ProcId) 
+Error = logs/message_$(Cluster)_$(Process).err 
+queue 159 
